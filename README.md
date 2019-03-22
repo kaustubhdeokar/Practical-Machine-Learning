@@ -93,5 +93,3 @@ The following object is masked from ‘package:rattle’: importance
     > testing <- testing[, cond]
     > rm(cond)
     > corrplot(cor(training[, -length(names(training))]), method = "color", tl.cex = 0.5)
-
-   ![](images/one.png)
