@@ -3,8 +3,10 @@ Question
 Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, our goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset)
 
 library(rattle)
+
 Rattle: A free graphical interface for data science with R.
 Version 5.2.0 Copyright (c) 2006-2018 Togaware Pty Ltd.
+
 Type 'rattle()' to shake, rattle, and roll your data.
     > library(caret)
 Loading required package: lattice
@@ -28,19 +30,18 @@ The following object is masked from ‘package:rattle’: importance
     > library(RColorBrewer)
     > set.seed(56789)
     > setwd(".")
-    > trainFile <- "./pml-training.csv"
-    > testFile  <- "./pml-testing.csv"
-    > trainRaw <- read.csv(trainFile)
-    > testRaw <- read.csv(testFile)
-    > dim(trainRaw)
-    > dim(trainRaw)
+    > filetrain <- "./pml-training.csv"
+    > filetest  <- "./pml-testing.csv"
+    > rawtrain <- read.csv(filetrain)
+    > rawtest <- read.csv(filetest)
+    > dim(rawtrain)
 
 [1] 19622   160
     
-    > dim(testRaw)
+    > dim(rawtest)
 [1]  20 160
 
-    > NZV <- nearZeroVar(trainRaw, saveMetrics = TRUE)
+    > NZV <- nearZeroVar(rawtrain, saveMetrics = TRUE)
     > head(NZV, 20)
                        freqRatio percentUnique zeroVar   nzv
     X                       1.000000  100.00000000   FALSE FALSE
@@ -64,16 +65,16 @@ The following object is masked from ‘package:rattle’: importance
     max_picth_belt          1.538462    0.11211905   FALSE FALSE
     max_yaw_belt          640.533333    0.34654979   FALSE  TRUE
 
-    > training01 <- trainRaw[, !NZV$nzv]
-    > testing01 <- testRaw[, !NZV$nzv]
+    > training01 <- rawtrain[, !NZV$nzv]
+    > testing01 <- rawtest[, !NZV$nzv]
     > dim(training01)
 [1] 19622   100
 
     > dim(testing01)
 [1]  20 100
     
-    > rm(trainRaw)
-    > rm(testRaw)
+    > rm(rawtrain)
+    > rm(rawtest)
     > rm(NZV)
     > regex=grepl("^X|timestamp|user_name", names(training01))
     > training <- training01[, !regex]
@@ -88,24 +89,24 @@ The following object is masked from ‘package:rattle’: importance
 
 [1] 20 95
 
-    > cond <- (colSums(is.na(training)) == 0)
-    > training <- training[, cond]
-    > testing <- testing[, cond]
-    > rm(cond)
+    > condition <- (colSums(is.na(training)) == 0)
+    > training <- training[, condition]
+    > testing <- testing[, condition]
+    > rm(condition)
     > corrplot(cor(training[, -length(names(training))]), method = "color", tl.cex = 0.5)
-  
- ![](images/three.png)
+
+![](images/three.png)
     
-    > inTrain <- createDataPartition(training$classe, p = 0.70, list = FALSE)
-    > validation <- training[-inTrain, ]
-    > training <- training[inTrain, ]
-    > rm(inTrain)
-    > modelTree <- rpart(classe ~ ., data = training, method = "class")
-    > prp(modelTree)
+    > trainin <- createDataPartition(training$classe, p = 0.70, list = FALSE)
+    > validation <- training[-trainin, ]
+    > training <- training[trainin, ]
+    > rm(trainin)
+    > model <- rpart(classe ~ ., data = training, method = "class")
+    > prp(model)
     
  ![](images/two.png)
     
-    > predictTree <- predict(modelTree, validation, type = "class")
+    > predictTree <- predict(model, validation, type = "class")
     > confusionMatrix(validation$classe, predictTree)
     > confusionMatrix(validation$classe, predictTree)
 
@@ -142,10 +143,10 @@ Statistics by Class:
         Detection Prevalence   0.2845   0.1935   0.1743   0.1638   0.1839
         Balanced Accuracy      0.8654   0.8270   0.8450   0.7851   0.8864
 
-    > accuracy <- postResample(predictTree, validation$classe)
+    > acc <- postResample(predictTree, validation$classe)
     > ose <- 1 - as.numeric(confusionMatrix(validation$classe, predictTree)$overall[1])
     > rm(predictTree)
-    > rm(modelTree)
+    > rm(model)
     > modelRF <- train(classe ~ ., data = training, method = "rf", trControl = trainControl(method = "cv", 5), ntree = 250)
     > modelRF
     
@@ -172,8 +173,8 @@ Accuracy was used to select the optimal model using the largest value.
 
 The final value used for the model was mtry = 27.
 
-    > predictRF <- predict(modelRF, validation)
-    > confusionMatrix(validation$classe, predictRF)
+    > predictionRf <- predict(modelRF, validation)
+    > confusionMatrix(validation$classe, predictionRf)
 
 Confusion Matrix and Statistics
     
@@ -208,17 +209,17 @@ Overall Statistics
     Detection Prevalence   0.2845   0.1935   0.1743   0.1638   0.1839
     Balanced Accuracy      0.9991   0.9992   0.9976   0.9975   0.9999
 
-    > accuracy <- postResample(predictRF, validation$classe)
-    > ose <- 1 - as.numeric(confusionMatrix(validation$classe, predictRF)$overall[1])
-    > rm(predictRF)
-    > rm(accuracy)
+    > acc <- postResample(predictionRf, validation$classe)
+    > ose <- 1 - as.numeric(confusionMatrix(validation$classe, predictionRf)$overall[1])
+    > rm(predictionRf)
+    > rm(acc)
     > rm(ose)
     > predict(modelRF,testing[,-length(names(testing))])
      [1] B A B A A E D B A A B C B A E E A B B B
     
     Levels: A B C D E
     
-    > pml_write_files = function(x){
+    > to_write = function(x){
     +   n = length(x)
     +   for(i in 1:n){
     +     filename = paste0("./Assignment_Solutions/problem_id_",i,".txt")
@@ -226,12 +227,14 @@ Overall Statistics
     +   }
     + }
     
-    > pml_write_files(predict(modelRF, testing[, -length(names(testing))]))
+    > to_write(predict(modelRF, testing[, -length(names(testing))]))
     rm(modelRF)
     > rm(training)
     > rm(testing)
     > rm(validation)
-    > rm(pml_write_files)
+    > rm(to_write)
+
+
 
 
 
