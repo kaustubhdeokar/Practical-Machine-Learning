@@ -93,9 +93,8 @@ The following object is masked from ‘package:rattle’: importance
     > testing <- testing[, cond]
     > rm(cond)
     > corrplot(cor(training[, -length(names(training))]), method = "color", tl.cex = 0.5)
-    _________________
-    ![](images/three.png)
-    _________________
+  
+ ![](images/three.png)
     
     > inTrain <- createDataPartition(training$classe, p = 0.70, list = FALSE)
     > validation <- training[-inTrain, ]
@@ -104,9 +103,7 @@ The following object is masked from ‘package:rattle’: importance
     > modelTree <- rpart(classe ~ ., data = training, method = "class")
     > prp(modelTree)
     
-    _________________
-    ![](images/two.png)
-    _________________
+ ![](images/two.png)
     
     > predictTree <- predict(modelTree, validation, type = "class")
     > confusionMatrix(validation$classe, predictTree)
