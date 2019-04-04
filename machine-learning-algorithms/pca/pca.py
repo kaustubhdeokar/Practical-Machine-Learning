@@ -31,9 +31,11 @@ print(w)
 print(v)
 
 #order by highest to lowest
-
+d={}
 for i in range(len(w)):
     d[w[i]]=v[i]
 
-d1=sorted(d.items,key=operator.itemgetter(0))
+d1=sorted(d.items(),key=operator.itemgetter(0))
     
+
+print('principal components are:{}'.format(d1))
