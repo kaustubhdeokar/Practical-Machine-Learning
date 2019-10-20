@@ -4,4 +4,4 @@ Offered By
 
 Johns Hopkins University
 
-This is in the branched repo.
+https://www.coursera.org/learn/practical-machine-learning
